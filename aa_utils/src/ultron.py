@@ -8,6 +8,7 @@ Created on Tue Mar 15 14:06:29 2016
 
 import random
 import roslaunch
+import rospkg
 import yaml
 import os, sys, signal
 import threading
@@ -43,7 +44,7 @@ class Command(object):
         print self.process.returncode
 
 
-def slamTrial(yamldoc, slam='sptam', package='aa_utils', dataset='MH1', launchFile='SPTAM-MH1-Automated.launch', bagFile='/home/ahmad/Downloads/MH_01_easy.bag', pwdir='/home/ahmad/catkin_ws/src/aa_utils/config/Generated/'):
+def slamTrial(yamldoc, slam='sptam', package='aa_utils', dataset='MH1', launchFile='SPTAM-MH1-Automated.launch', bagFile=rospkg.RosPack().get_path('aa_utils')+'/datasets/MH_01_easy.bag', pwdir=rospkg.RosPack().get_path('aa_utils')+'/config/Generated/'):
     while True:
         salt =  str(random.randint(1,10000))
         try:
@@ -103,13 +104,13 @@ def slamTrial(yamldoc, slam='sptam', package='aa_utils', dataset='MH1', launchFi
         print "Failed to write to files!"
 
 def evaluate_loss_ate(gtFile, outFile):
-    return subprocess.check_output("/home/ahmad/Downloads/ate_new/evaluate_ate.py --estimate_scale --plot v1.png " + gtFile + " "+ outFile, shell=True).strip()
+    return subprocess.check_output(rospkg.RosPack().get_path('aa_utils')+"/src/evaluate_ate.py --estimate_scale --plot v1.png " + gtFile + " "+ outFile, shell=True).strip()
 
 if __name__=="__main__":
     doc = {
   "SLAMReader": {
     "topic": "/sptam/robot/pose",
-    "outfile": "/home/ahmad/catkin_ws/outputs/SPTAM-MH1.csv"
+    "outfile": os.environ['HOME']+"/catkin_ws/outputs/SPTAM-MH1.csv"
   },
   "sptam": {'DescriptorExtractor': {'Name': 'BRIEF', 'bytes': 32},
  'DescriptorMatcher': {'Name': 'BruteForce-Hamming', 'crossCheck': False},
@@ -128,13 +129,13 @@ if __name__=="__main__":
  'MatchingNeighborhood': 1},
   "GTReader": {
     "topic": "/leica/position",
-    "outfile": "/home/ahmad/catkin_ws/outputs/SPTAM-MH1_gt.csv"
+    "outfile": os.environ['HOME']+"/catkin_ws/outputs/SPTAM-MH1_gt.csv"
   },
   "rosBag": {
-    "args": " --clock /home/ahmad/Downloads/MH_01_easy.bag"
+    "args": " --clock "+rospkg.RosPack().get_path('aa_utils')+"/datasets/MH_01_easy.bag"
   },
   "CamInfoPublisher": {
-    "infile": "/home/ahmad/Downloads/MH_01_easy/mav0/sensors.yaml"
+    "infile": rospkg.RosPack().get_path('aa_utils')+"/config/MH1-sensors.yaml"
   }
 }
 
