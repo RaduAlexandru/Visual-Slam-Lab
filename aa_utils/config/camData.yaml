@@ -1,0 +1,37 @@
+%YAML:1.0
+camMat1: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [458.654,0.0,367.215,0.0, 457.296,  248.375,0.0,0.0,1.0]
+camMat2: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [457.587,0.0, 379.999,0.0, 456.134, 255.238,0.0,0.0,1.0]
+distortion_model: radial-tangential
+distCoeffs1: !!opencv-matrix
+   rows: 1
+   cols: 5
+   dt: d
+   data: [-0.28340811, 0.07395907, 0.00019359, 1.76187114e-05, 0.0]
+
+distCoeffs2: !!opencv-matrix
+   rows: 1
+   cols: 5
+   dt: d
+   data: [-0.28368365,  0.07451284, -0.00010473, -3.55590700e-05, 0.0]
+
+R: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [9.95766646e-01, -9.55945989e-04  , 1.61931117e-04, 3.65516361e-03 ,  9.99465910e-01 , -1.42510943e-02, 8.98460837e-04 ,  1.39217378e-02 ,  9.99838258e-01 ]
+t: !!opencv-matrix
+   rows: 3
+   cols: 1
+   dt: d
+   data: [ 4.46936299e-02,  2.05998064e-02 , 8.96344761e-03] 
+   
+  
+

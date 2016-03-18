@@ -1,0 +1,38 @@
+%YAML:1.0
+camMat1: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [458.654, 0.0, 367.215, 0.0, 457.296, 248.375, 0.0, 0.0, 1.0]
+camMat2: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [457.587, 0.0, 379.999, 0.0, 456.134, 255.238, 0.0, 0.0, 1.0]
+
+distCoeffs1: !!opencv-matrix
+   rows: 1
+   cols: 5
+   dt: d
+   data: [-0.28340811, 0.07395907, 0.00019359, 1.76187114e-05, 0.0]
+
+distCoeffs2: !!opencv-matrix
+   rows: 1
+   cols: 5
+   dt: d
+   data: [-0.28368365,  0.07451284, -0.00010473, -3.55590700e-05, 0.0]
+
+R: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [9.99997256e-01, -2.31713572e-03  , -3.43393121e-04, 2.31206719e-03 ,  9.99898049e-01 , -1.40906685e-02, 3.76008102e-04 ,  1.40898358e-02 ,  9.99900663e-01 ]
+t: !!opencv-matrix
+   rows: 3
+   cols: 1
+   dt: d
+   data: [ -50.706459062,0.15556820057,0.00088938278] 
+#   data: [ 1.1007438e-01,  -1.56612054e-04 , 8.89382785e-04] 
+   
+  
+distortion_model: plumb_bob

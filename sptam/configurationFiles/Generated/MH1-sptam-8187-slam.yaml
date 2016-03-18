@@ -1,0 +1,20 @@
+DescriptorExtractor:
+  Name: BRIEF
+  bytes: 32
+DescriptorMatcher:
+  Name: BruteForce-Hamming
+  crossCheck: false
+EpipolarDistance: 0
+FeatureDetector:
+  Name: GFTT
+  minDistance: 15.0
+  nfeatures: 2000
+  qualityLevel: 0.01
+  useHarrisDetector: false
+FramesBetweenKeyFrames: 0
+FrustumFarPlaneDist: 10000.0
+FrustumNearPlaneDist: 0.1
+KeyFrameDistance: 0
+MatchingCellSize: 15
+MatchingDistance: 25
+MatchingNeighborhood: 1

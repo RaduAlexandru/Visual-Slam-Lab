@@ -1,0 +1,37 @@
+%YAML 1.1
+---
+sptam:
+  FeatureDetector:
+    Name: 'GFTT'
+    nfeatures: 2000
+    minDistance: 15.0
+    qualityLevel: 0.01
+    useHarrisDetector: false
+  DescriptorExtractor:
+    Name: 'BRIEF'
+    bytes: 32
+
+  DescriptorMatcher:
+  #normType: use
+    #  - NORM_L1 or NORM_L2 for SIFT and SURF descriptors
+    #  - NORM_HAMMING for ORB, BRISK, and BRIEF
+    #  - NORM_HAMMING2 should be used with ORB when WTA_K==3 or 4
+    Name: 'BruteForce-Hamming'
+    crossCheck: false
+
+  MatchingCellSize: 15
+  MatchingNeighborhood: 1
+  MatchingDistance: 25
+  EpipolarDistance: 0
+  KeyFrameDistance: 0
+  FramesBetweenKeyFrames: 0
+  FrustumNearPlaneDist: 0.1
+  FrustumFarPlaneDist: 10000.0
+SLAMReader:
+  topic: '/sptam/robot/pose'
+  outfile: '/home/ahmad/catkin_ws/outputs/SPTAM-MH1.csv'
+GTReader:
+  topic: '/leica/position'
+  outfile: '/home/ahmad/catkin_ws/outputs/SPTAM-MH1_gt.csv'
+CamInfoPublisher:
+  infile: '/home/ahmad/Downloads/MH_01_easy/mav0/sensors.yaml'
