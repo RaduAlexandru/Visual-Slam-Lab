@@ -13,20 +13,9 @@
     <remap from="pose" to="sptam/robot/pose"/>
     <remap from="path" to="sptam/robot/path"/>
   </node>
-
-<!--  <node pkg="vs_reader" type="new_camera_publisher.py" name="left_camera_info_pub">
-    <param name="file" value="/home/ahmad/Downloads/MH_01_easy/mav0/cam0/sensor.yaml"/>
-    <param name="pub_topic" value="/left/camera_info"/>
-    <param name="sub_topic" value="/cam0/image_raw"/>
-
-  </node>
-  <node pkg="vs_reader" type="new_camera_publisher.py" name="right_camera_info_pub">
-        <param name="file" value="/home/ahmad/Downloads/MH_01_easy/mav0/cam1/sensor.yaml"/>
-        <param name="pub_topic" value="/right/camera_info"/>
-        <param name="sub_topic" value="/cam1/image_raw"/>
-  </node>-->
+  
   <node pkg="aa_utils" type="camera_publisher.py" name="camera_info_pub">
-        <param name="infile" value="/home/ahmad/Downloads/MH_01_easy/mav0/sensors.yaml"/>
+        <param name="infile" value="$(find aa_utils)/config/MH1-sensors.yaml"/>
         <param name="pub_topic_r" value="/right/camera_info"/>
         <param name="sub_topic_r" value="/cam1/image_raw"/>
         <param name="pub_topic_l" value="/left/camera_info"/>
@@ -59,7 +48,7 @@
   </node>
   <node pkg="aa_utils" type="pyreader.py" name="path_to_csv_node">
         <param name="topic" value="/sptam/robot/pose"/>
-        <param name="outfile" value="/home/ahmad/catkin_ws/outputs/SPTAM-MH1.csv"/>
+        <param name="outfile" value="$(find sptam)/../../outputs/SPTAM-MH1.csv"/>
     </node>
-    <node pkg="rosbag" type="play" name="rosbag" args=" --clock /home/ahmad/Downloads/MH_01_easy.bag" />
+    <node pkg="rosbag" type="play" name="rosbag" args=" --clock $(find aa_utils)/datasets/MH_01_easy.bag" />
 </launch>

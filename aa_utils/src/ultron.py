@@ -16,6 +16,7 @@ import hyperopt.pyll.stochastic
 import rospy
 import random
 import roslaunch
+import rospkg
 import yaml
 import os, sys, signal
 import threading
@@ -25,7 +26,6 @@ if os.name == 'posix' and sys.version_info[0] < 3:
     import subprocess32 as subprocess
 else:
     import subprocess
-
 
 
 class Command(object):
@@ -56,7 +56,7 @@ class Full_data:
     data = {
   "SLAMReader": {
     "topic": "/sptam/robot/pose",
-    "outfile": "/home/alex/catkin_ws/outputs/SPTAM-MH1.csv"
+    "outfile": os.environ['HOME']+"/catkin_ws/outputs/SPTAM-MH1.csv"
   },
   "sptam": {
     "MatchingNeighborhood": 1,
@@ -85,13 +85,13 @@ class Full_data:
   },
   "GTReader": {
     "topic": "/leica/position",
-    "outfile": "/home/alex/catkin_ws/outputs/SPTAM-MH1_gt.csv"
+    "outfile": os.environ['HOME']+"/catkin_ws/outputs/SPTAM-MH1_gt.csv"
   },
   "rosBag": {
-    "args": " --clock /home/alex/Documents/Data_Bags/MH_01_easy.bag"
+    "args": " --clock "+rospkg.RosPack().get_path('aa_utils')+"/datasets/MH_01_easy.bag"
   },
   "CamInfoPublisher": {
-    "infile": "/home/alex/Documents/Data_Bags/MH_01_easy/mav0/sensors.yaml"
+    "infile": rospkg.RosPack().get_path('aa_utils')+"/config/MH1-sensors.yaml"
   }
 }
     def apply_params (self,params):
@@ -125,9 +125,10 @@ def f(params):
         }
 
 def evaluate_loss_ate(gtFile, outFile):
-    return subprocess.check_output("./aa_utils/src/evaluate_ate.py --estimate_scale --plot v1.png " + gtFile + " "+ outFile, shell=True).strip()
+    return subprocess.check_output(rospkg.RosPack().get_path('aa_utils')+"/src/evaluate_ate.py --estimate_scale --plot v1.png " + gtFile + " "+ outFile, shell=True).strip()
 
-def slamTrial(yamldoc, slam='sptam', package='aa_utils', dataset='MH1', launchFile='SPTAM-MH1-Automated.launch', bagFile='/home/alex/Documents/Data_Bags/MH_01_easy.bag', pwdir='/home/alex/catkin_ws/src/aa_utils/config/Generated/'):
+
+def slamTrial(yamldoc, slam='sptam', package='aa_utils', dataset='MH1', launchFile='SPTAM-MH1-Automated.launch', bagFile=rospkg.RosPack().get_path('aa_utils')+'/datasets/MH_01_easy.bag', pwdir=rospkg.RosPack().get_path('aa_utils')+'/config/Generated/'):
     while True:
         salt =  str(random.randint(1,10000))
         try:
@@ -189,19 +190,7 @@ def slamTrial(yamldoc, slam='sptam', package='aa_utils', dataset='MH1', launchFi
 
 
 if __name__=="__main__":
-  #Params for DPPTAM
-  '''
-  space = {
-      'calculate_superpixels': hp.randint('calculate_superpixels', 2),
-      'num_cameras_mapping_th': 7 + hp.randint('num_cameras_mapping_th', 5),   #9 was default, now it's 7+  0,1,2,3,4
-      'translational_ratio_th_min': hp.uniform('translational_ratio_th_min', 0.03, 0.15),
-      'limit_ratio_sing_val': hp.uniform('limit_ratio_sing_val', 10, 1000),
-      'limit_normalized_residual': hp.uniform('limit_normalized_residual', 0.05, 0.50),
-      'matchings_active_search': hp.randint('matchings_active_search', 5)
-  }
-  '''
-
-  #Params for SPTAM
+ #Params for SPTAM
   space ={'DescriptorExtractor': hp.choice('DescriptorExtractor', [
                               {
                                   'Name': 'BRIEF',

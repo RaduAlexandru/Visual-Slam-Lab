@@ -29,9 +29,9 @@ sptam:
   FrustumFarPlaneDist: 10000.0
 SLAMReader:
   topic: '/sptam/robot/pose'
-  outfile: '/home/ahmad/catkin_ws/outputs/SPTAM-MH1.csv'
+  outfile: '$(find sptam)/../../outputs/SPTAM-MH1.csv'
 GTReader:
   topic: '/leica/position'
-  outfile: '/home/ahmad/catkin_ws/outputs/SPTAM-MH1_gt.csv'
+  outfile: '$(find sptam)/../../outputs/SPTAM-MH1_gt.csv'
 CamInfoPublisher:
-  infile: '/home/ahmad/Downloads/MH_01_easy/mav0/sensors.yaml'
+  infile: '$(find aa_utils)/config/MH1-sensors.yaml'
