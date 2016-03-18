@@ -9,7 +9,7 @@
   <!-- Ground Truth path publisher. Transforms poses into path. -->
 
   <!-- Camera info publisher. Publishes CameraInfo for rectification -->
-  <node pkg="aa_utils" type="testcamera_publisher.py" name="camera_info_pub">
+  <node pkg="aa_utils" type="camera_publisher.py" name="camera_info_pub">
     <rosparam command="load" file="$(arg configFile)" ns="CamInfoPublisher"/>
     <param name="pub_topic_r" value="/right/camera_info"/>
     <param name="sub_topic_r" value="/cam1/image_raw"/>

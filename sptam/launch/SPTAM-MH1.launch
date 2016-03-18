@@ -25,7 +25,7 @@
         <param name="pub_topic" value="/right/camera_info"/>
         <param name="sub_topic" value="/cam1/image_raw"/>
   </node>-->
-  <node pkg="aa_utils" type="testcamera_publisher.py" name="camera_info_pub">
+  <node pkg="aa_utils" type="camera_publisher.py" name="camera_info_pub">
         <param name="infile" value="/home/ahmad/Downloads/MH_01_easy/mav0/sensors.yaml"/>
         <param name="pub_topic_r" value="/right/camera_info"/>
         <param name="sub_topic_r" value="/cam1/image_raw"/>
