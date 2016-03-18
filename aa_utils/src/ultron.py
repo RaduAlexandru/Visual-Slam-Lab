@@ -3,19 +3,29 @@
 """
 Created on Tue Mar 15 14:06:29 2016
 
-@author: ahmad
+@author: ahmad, alex
 """
 
+# run with:   rosrun python_scrips_ros hyper1.py _outfile:=best_spptam.yaml
+
+
+import pickle
+import time
+from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
+import hyperopt.pyll.stochastic
+import rospy
 import random
 import roslaunch
 import yaml
 import os, sys, signal
 import threading
 
+
 if os.name == 'posix' and sys.version_info[0] < 3:
     import subprocess32 as subprocess
 else:
     import subprocess
+
 
 
 class Command(object):
@@ -42,8 +52,82 @@ class Command(object):
             # thread.join()
         print self.process.returncode
 
+class Full_data:
+    data = {
+  "SLAMReader": {
+    "topic": "/sptam/robot/pose",
+    "outfile": "/home/alex/catkin_ws/outputs/SPTAM-MH1.csv"
+  },
+  "sptam": {
+    "MatchingNeighborhood": 1,
+    "KeyFrameDistance": 0,
+    "FrustumFarPlaneDist": 10000.0,
+    "DescriptorMatcher": {
+      "crossCheck": False,
+      "Name": "BruteForce-Hamming"
+    },
+    "FramesBetweenKeyFrames": 0,
+    "DescriptorExtractor": {
+      "bytes": 32,
+      "Name": "BRIEF"
+    },
+    "FrustumNearPlaneDist": 0.10000000000000001,
+    "MatchingDistance": 25,
+    "EpipolarDistance": 0,
+    "MatchingCellSize": 15,
+    "FeatureDetector": {
+      "qualityLevel": 0.01,
+      "nfeatures": 2000,
+      "Name": "GFTT",
+      "minDistance": 15.0,
+      "useHarrisDetector": False
+    }
+  },
+  "GTReader": {
+    "topic": "/leica/position",
+    "outfile": "/home/alex/catkin_ws/outputs/SPTAM-MH1_gt.csv"
+  },
+  "rosBag": {
+    "args": " --clock /home/alex/Documents/Data_Bags/MH_01_easy.bag"
+  },
+  "CamInfoPublisher": {
+    "infile": "/home/alex/Documents/Data_Bags/MH_01_easy/mav0/sensors.yaml"
+  }
+}
+    def apply_params (self,params):
+        for key in sorted(params.iterkeys()):
+          self.data["sptam"][key]=params[key]
+    def write_to_file(self,file_path):
+      #file = open(file_path, 'w+')
+      with open(file_path, 'w+') as yaml_file:
+          yaml_file.write( yaml.dump(self.data, default_flow_style=False))
 
-def slamTrial(yamldoc, slam='sptam', package='aa_utils', dataset='MH1', launchFile='SPTAM-MH1-Automated.launch', bagFile='/home/ahmad/Downloads/MH_01_easy.bag', pwdir='/home/ahmad/catkin_ws/src/aa_utils/config/Generated/'):
+
+def f(params):
+    full_data= Full_data()
+
+    loss=0
+    #full_data.apply_params(params)
+    slamTrial(full_data.data)
+    loss=evaluate_loss_ate(full_data.data["GTReader"]["outfile"],full_data.data["SLAMReader"]["outfile"])
+    #loss=hyper_test.test()
+    print loss
+
+    return {
+        'loss': loss,
+        'status': STATUS_OK,
+        # -- store other results like this
+        'eval_time': time.time(),
+        'other_stuff': {'type': None, 'value': [0, 1, 2]},
+        # -- attachments are handled differently
+        'attachments':
+            {'time_module': pickle.dumps(time.time)}
+        }
+
+def evaluate_loss_ate(gtFile, outFile):
+    return subprocess.check_output("./aa_utils/src/evaluate_ate.py --estimate_scale --plot v1.png " + gtFile + " "+ outFile, shell=True).strip()
+
+def slamTrial(yamldoc, slam='sptam', package='aa_utils', dataset='MH1', launchFile='SPTAM-MH1-Automated.launch', bagFile='/home/alex/Documents/Data_Bags/MH_01_easy.bag', pwdir='/home/alex/catkin_ws/src/aa_utils/config/Generated/'):
     while True:
         salt =  str(random.randint(1,10000))
         try:
@@ -102,43 +186,51 @@ def slamTrial(yamldoc, slam='sptam', package='aa_utils', dataset='MH1', launchFi
     else:
         print "Failed to write to files!"
 
-def evaluate_loss_ate(gtFile, outFile):
-    return subprocess.check_output("/home/ahmad/Downloads/ate_new/evaluate_ate.py --estimate_scale --plot v1.png " + gtFile + " "+ outFile, shell=True).strip()
+
 
 if __name__=="__main__":
-    doc = {
-  "SLAMReader": {
-    "topic": "/sptam/robot/pose",
-    "outfile": "/home/ahmad/catkin_ws/outputs/SPTAM-MH1.csv"
-  },
-  "sptam": {'DescriptorExtractor': {'Name': 'BRIEF', 'bytes': 32},
- 'DescriptorMatcher': {'Name': 'BruteForce-Hamming', 'crossCheck': False},
- 'EpipolarDistance': 0,
- 'FeatureDetector': {'Name': 'GFTT',
-                     'minDistance': 15.0,
-                     'nfeatures': 2000,
-                     'qualityLevel': 0.01,
-                     'useHarrisDetector': False},
- 'FramesBetweenKeyFrames': 0,
- 'FrustumFarPlaneDist': 10000.0,
- 'FrustumNearPlaneDist': 0.10000000000000001,
- 'KeyFrameDistance': 0,
- 'MatchingCellSize': 15,
- 'MatchingDistance': 25,
- 'MatchingNeighborhood': 1},
-  "GTReader": {
-    "topic": "/leica/position",
-    "outfile": "/home/ahmad/catkin_ws/outputs/SPTAM-MH1_gt.csv"
-  },
-  "rosBag": {
-    "args": " --clock /home/ahmad/Downloads/MH_01_easy.bag"
-  },
-  "CamInfoPublisher": {
-    "infile": "/home/ahmad/Downloads/MH_01_easy/mav0/sensors.yaml"
+  #Params for DPPTAM
+  '''
+  space = {
+      'calculate_superpixels': hp.randint('calculate_superpixels', 2),
+      'num_cameras_mapping_th': 7 + hp.randint('num_cameras_mapping_th', 5),   #9 was default, now it's 7+  0,1,2,3,4
+      'translational_ratio_th_min': hp.uniform('translational_ratio_th_min', 0.03, 0.15),
+      'limit_ratio_sing_val': hp.uniform('limit_ratio_sing_val', 10, 1000),
+      'limit_normalized_residual': hp.uniform('limit_normalized_residual', 0.05, 0.50),
+      'matchings_active_search': hp.randint('matchings_active_search', 5)
   }
-}
+  '''
 
-    # slamTrial(doc)
-    slamTrial(doc)
-    print evaluate_loss_ate(doc["GTReader"]["outfile"],doc["SLAMReader"]["outfile"])
-    exit(0)
+  #Params for SPTAM
+  space ={'DescriptorExtractor': hp.choice('DescriptorExtractor', [
+                              {
+                                  'Name': 'BRIEF',
+                                  'bytes': 32
+                              },
+                              {
+                                  'Name': 'ORB',
+                                  'bytes': 32
+                              },
+                          ]),
+         'MatchingCellSize': hp.quniform('MatchingCellSize', 10, 40, 1),   # default is 15, so we do something between 10 and 40
+         'MatchingNeighborhood': hp.quniform('MatchingNeighborhood', 1, 3, 1), #default is 1 so we make it between 1 and 3
+         'MatchingDistance': hp.uniform ('MatchingDistance', 15, 35), #default is 25
+         'EpipolarDistance' : hp.quniform('EpipolarDistance', 0, 3, 1), #default is 0 and a double, doesn't make sense to be double so I make it int between 0 and 3
+         'KeyFrameDistance' : hp.quniform('KeyFrameDistance', 0, 3, 1), #unkown description but the default was 0
+         'FramesBetweenKeyFrames' : hp.quniform('FramesBetweenKeyFrames', 0, 3, 1), #unknown description but the default was 0
+         'FrustumNearPlaneDist' : hp.uniform ('FrustumNearPlaneDist', 0.0, 10.0), #default is 0.1
+         'FrustumFarPlaneDist' : hp.uniform ('FrustumFarPlaneDist' , 500, 2000) #default is 1000
+  }
+
+
+
+  trials = Trials()
+  best = fmin(f, space,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      algo=tpe.suggest, max_evals=10, trials=trials)
+
+  full_data= Full_data()
+  full_data.apply_params(best)
+  rospy.init_node('hyperpySPPTAM')
+  file_path = rospy.get_param('~outfile', 'std_msgs/String')
+  full_data.write_to_file(file_path)
+
+  print 'best: \n', best
